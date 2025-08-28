@@ -1,43 +1,47 @@
 # Sprint Board - Task Management Application
 
-A modern, responsive task management application built with Next.js, featuring drag-and-drop functionality and real-time updates.
+A modern task management application built with Next.js featuring drag-and-drop functionality, real-time updates, and offline support.
 
 ## Features
 
-- 🎯 **Kanban Board**: Organize tasks in To Do, In Progress, and Done columns
-- 🖱️ **Drag & Drop**: Move tasks between columns with smooth animations
-- 📱 **Responsive Design**: Works perfectly on desktop and mobile devices
-- 🎨 **Modern UI**: Built with shadcn/ui components and Tailwind CSS
-- 🔐 **Authentication**: Simple login system with persistent sessions
-- 🚀 **Real-time Updates**: Powered by React Query for optimistic updates
-- 📊 **Task Management**: Create, update, and delete tasks with priorities
-- 🌙 **Theme Support**: Light and dark mode ready
+- **Kanban Board**: Organize tasks across To Do, In Progress, and Done columns
+- **Drag & Drop**: Move tasks between columns with smooth animations
+- **Task Management**: Create, edit, delete, and prioritize tasks
+- **Real-time Updates**: Optimistic updates with React Query
+- **Offline Support**: Queue actions when offline and sync when back online
+- **Authentication**: Simple login system with persistent sessions
+- **Search & Filter**: Find tasks by title and filter by priority
+- **Dark Mode**: Toggle between light and dark themes
+- **Responsive Design**: Works on desktop, tablet, and mobile devices
+- **Toast Notifications**: User feedback for all actions
 
 ## Tech Stack
 
-- **Frontend**: Next.js 15, React 19, TypeScript
-- **UI Components**: shadcn/ui, Tailwind CSS
-- **State Management**: Zustand, React Query
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS with shadcn/ui components
+- **State Management**: Zustand for global state
+- **Data Fetching**: React Query (TanStack Query)
 - **Drag & Drop**: @dnd-kit
 - **Animations**: Framer Motion
 - **Backend**: JSON Server (mock API)
 - **Icons**: Lucide React
 - **Notifications**: Sonner
 
-## Getting Started
+## Setup and Installation
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 18 or higher
 - pnpm (recommended) or npm
 
-### Installation
+### Local Development
 
 1. Clone the repository:
 
 ```bash
 git clone <repository-url>
-cd nailit-frontend-assignment
+cd nailit-frontend-task
 ```
 
 2. Install dependencies:
@@ -52,12 +56,12 @@ pnpm install
 pnpm run dev:all
 ```
 
-This will start both:
+This command starts both:
 
-- Next.js development server on `http://localhost:3000`
-- JSON Server API on `http://localhost:3001`
+- Next.js development server on http://localhost:3000
+- JSON Server API on http://localhost:3001
 
-Alternatively, you can run them separately:
+Alternatively, run them separately:
 
 ```bash
 # Terminal 1: Start the API server
@@ -67,57 +71,73 @@ pnpm run json-server
 pnpm run dev
 ```
 
+4. Open http://localhost:3000 in your browser
+
 ### Login
 
-Use any email/password combination to login. The authentication is simulated for demo purposes.
+Use any email and password combination to access the application. Authentication is simulated for demonstration purposes.
+
+## Available Scripts
+
+- `pnpm dev` - Start Next.js development server
+- `pnpm dev:all` - Start both frontend and backend servers
+- `pnpm build` - Build the application for production
+- `pnpm start` - Start production server
+- `pnpm lint` - Run ESLint
+- `pnpm json-server` - Start JSON Server API
 
 ## Project Structure
 
 ```
 src/
-├── api/           # API layer and data fetching
-├── app/           # Next.js app directory (pages)
-├── components/    # Reusable React components
-│   ├── board/     # Board-specific components
-│   ├── layout/    # Layout components (header, etc.)
-│   ├── providers/ # Context providers
-│   ├── task/      # Task-related components
-│   └── ui/        # shadcn/ui components
-├── stores/        # Zustand state stores
-├── types/         # TypeScript type definitions
-└── lib/           # Utility functions
+├── api/              # API layer and HTTP clients
+├── app/              # Next.js app directory (routes)
+├── components/       # React components
+│   ├── auth/         # Authentication components
+│   ├── board/        # Kanban board components
+│   ├── layout/       # Layout components
+│   ├── providers/    # Context providers
+│   ├── task/         # Task-related components
+│   └── ui/           # shadcn/ui components
+├── hooks/            # Custom React hooks
+├── lib/              # Utility functions and services
+├── stores/           # Zustand state stores
+└── types/            # TypeScript type definitions
 ```
 
-## Available Scripts
+## Key Features Implementation
 
-- `pnpm dev` - Start development server
-- `pnpm dev:all` - Start both frontend and backend
-- `pnpm build` - Build for production
-- `pnpm start` - Start production server
-- `pnpm lint` - Run ESLint
-- `pnpm json-server` - Start mock API server
+- **Offline Queue**: Actions are queued when offline and automatically synced when connection is restored
+- **Optimistic Updates**: UI updates immediately for better user experience
+- **Drag & Drop**: Implemented with @dnd-kit for smooth interactions
+- **Theme Support**: System, light, and dark mode support with next-themes
+- **Error Handling**: Comprehensive error boundaries and user feedback
 
-## Development Highlights
+## My Variant: Offline Queue
 
-This project demonstrates:
+---
 
-- Modern React patterns with hooks and context
-- TypeScript for type safety
-- Component composition and reusability
-- Responsive design principles
-- State management with multiple stores
-- API integration with React Query
-- Drag and drop implementation
-- Modern build tools and development workflow
+I implemented the offline queue variant (q-z) which queues write operations when the device is offline and replays them when connectivity is restored.
 
-## Contributing
+### Implementation Challenges
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests and linting
-5. Submit a pull request
+Initially, I attempted to use `navigator.onLine` for offline detection. However, after researching online, I discovered that this API is unreliable across browsers. In Chrome and Safari, `navigator.onLine` only returns false if the browser cannot connect to a local area network (LAN) or router, not when there's no actual internet connectivity. Firefox has even more limited support for this API.
 
-## License
+To solve this, I implemented a more robust offline detection strategy:
 
-This project is for educational purposes as part of a coding assignment.
+- **API Health Checks**: Mock API calls to the JSON Server every 3 seconds to verify actual connectivity
+- **Fallback Strategy**: If `navigator.onLine` reports offline, trust it immediately; if online, verify with network requests
+- **Request Timeout**: 5-second timeout on health checks to prevent hanging
+- **Caching**: Cache results for 5 seconds to avoid excessive network requests
+
+### Features
+
+- **Visual Indicators**: Queued tasks display an orange "Queued" badge
+- **Persistent Queue**: Queue survives browser refreshes using localStorage
+- **Automatic Sync**: When connectivity is restored, all queued actions are automatically processed
+- **Queue Management**: Failed queue items remain for retry, successful ones are removed
+- **Error Handling**: Network failures are handled gracefully with user feedback
+
+## Time Spent
+
+**Total Development Time: approx 2.5 hours**
