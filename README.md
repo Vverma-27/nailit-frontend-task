@@ -24,7 +24,7 @@ A modern task management application built with Next.js featuring drag-and-drop 
 - **Data Fetching**: React Query (TanStack Query)
 - **Drag & Drop**: @dnd-kit
 - **Animations**: Framer Motion
-- **Backend**: JSON Server (deployed to vercel separately)
+- **Backend**: JSON Server (deployed to vercel separately) Link to backend repo: https://github.com/Vverma-27/nailit-json-server
 
 ## Setup and Installation
 
