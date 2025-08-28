@@ -1,9 +1,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { AuthState } from "@/types";
+import { STORAGE_KEYS } from "@/lib/constants";
+import type { AuthState } from "@/types";
 
 interface AuthStore extends AuthState {
-  login: (token: string) => void;
+  setAuth: (token: string) => void;
   logout: () => void;
 }
 
@@ -12,11 +13,23 @@ export const useAuthStore = create<AuthStore>()(
     (set) => ({
       isAuthenticated: false,
       token: null,
-      login: (token: string) => set({ isAuthenticated: true, token }),
-      logout: () => set({ isAuthenticated: false, token: null }),
+      setAuth: (token: string) =>
+        set({
+          isAuthenticated: true,
+          token,
+        }),
+      logout: () =>
+        set({
+          isAuthenticated: false,
+          token: null,
+        }),
     }),
     {
-      name: "auth-storage",
+      name: STORAGE_KEYS.AUTH_TOKEN,
+      partialize: (state) => ({
+        isAuthenticated: state.isAuthenticated,
+        token: state.token,
+      }),
     }
   )
 );
