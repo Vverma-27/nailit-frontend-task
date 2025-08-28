@@ -36,7 +36,6 @@ export function useCreateTask() {
           : 0;
 
       const optimisticTask: Task = {
-        id: `temp-${Date.now()}`,
         ...newTask,
         status: targetStatus,
         order: nextOrder,

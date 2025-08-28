@@ -24,6 +24,7 @@ import { TASK_PRIORITIES } from "@/lib/constants";
 import { Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import type { TaskPriority } from "@/types";
+import { generateId } from "@/lib/utils";
 
 interface CreateTaskModalProps {
   open: boolean;
@@ -42,6 +43,7 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
     if (!title.trim()) return;
     createTaskMutation.mutate(
       {
+        id: generateId(),
         title: title.trim(),
         description: description.trim(),
         priority,
