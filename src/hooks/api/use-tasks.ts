@@ -20,6 +20,7 @@ export function useCreateTask() {
 
   return useMutation({
     mutationFn: isOnline ? createTask : () => Promise.resolve(null),
+    networkMode: "always",
     onMutate: async (newTask: CreateTaskInput) => {
       await queryClient.cancelQueries({ queryKey: QUERY_KEYS.TASKS });
 
