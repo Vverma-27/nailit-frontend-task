@@ -42,11 +42,13 @@ git clone <repository-url>
 cd nailit-frontend-task
 ```
 
-2. Install dependencies:
+2. Install dependencies & Set up env:
 
 ```bash
 pnpm install
 ```
+
+Copy env from .env.example into .env file and set NEXT_PUBLIC_API_URL to the port your json-server is running on. Otherwise if you are not running json-server locally, you can set it to "https://nailit-json-server.vercel.app" where my server is running.
 
 3. Start the development servers:
 
