@@ -31,7 +31,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
         <div className="space-y-2">
           <h3 className="font-medium text-sm">{task.title}</h3>
           {task.description && (
-            <p className="text-xs text-gray-600 line-clamp-2 truncat">
+            <p className="text-xs text-gray-600 line-clamp-2">
               {task.description}
             </p>
           )}
