@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -17,136 +19,166 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { tasksApi } from "@/api/tasks";
-import { CreateTaskInput, TaskPriority, TaskStatus } from "@/types";
+import { useCreateTask } from "@/hooks/api/use-tasks";
+import { QUERY_KEYS, TASK_PRIORITIES, TASK_STATUSES } from "@/lib/constants";
+import { Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import type { Task, TaskPriority, TaskStatus } from "@/types";
 
 interface CreateTaskModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  defaultStatus?: TaskStatus;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function CreateTaskModal({
-  isOpen,
-  onClose,
-  defaultStatus = "todo",
-}: CreateTaskModalProps) {
+export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<TaskPriority>("medium");
-  const [status, setStatus] = useState<TaskStatus>(defaultStatus);
+  const createTaskMutation = useCreateTask();
 
-  const queryClient = useQueryClient();
-
-  const createTaskMutation = useMutation({
-    mutationFn: tasksApi.createTask,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      toast.success("Task created successfully!");
-      handleClose();
-    },
-    onError: () => {
-      toast.error("Failed to create task");
-    },
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title.trim()) {
-      toast.error("Please enter a task title");
-      return;
-    }
-
-    const taskData: CreateTaskInput = {
-      title: title.trim(),
-      description: description.trim(),
-      priority,
-      status,
-    };
-
-    createTaskMutation.mutate(taskData);
+    if (!title.trim()) return;
+    createTaskMutation.mutate(
+      {
+        title: title.trim(),
+        description: description.trim(),
+        priority,
+        status: "todo",
+      },
+      {
+        onSuccess: () => {
+          toast.success("Task created successfully", {
+            description: `"${title.trim()}" has been added to your board.`,
+          });
+          // Reset form
+          setTitle("");
+          setDescription("");
+          setPriority("medium");
+          onOpenChange(false);
+        },
+        onError: (error) => {
+          toast.error("Failed to create task", {
+            description:
+              "Sorry, there was an issue creating the task. Please try again.",
+          });
+        },
+      }
+    );
   };
 
   const handleClose = () => {
     setTitle("");
     setDescription("");
     setPriority("medium");
-    setStatus(defaultStatus);
-    onClose();
+    onOpenChange(false);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-md max-w-[95vw] mx-auto">
         <DialogHeader>
-          <DialogTitle>Create New Task</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Plus className="w-5 h-5" />
+            Create New Task
+          </DialogTitle>
+          <DialogDescription>
+            Add a new task to your sprint board.
+          </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
+        <motion.form
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          onSubmit={handleSubmit}
+          className="space-y-4"
+        >
+          <div className="space-y-2">
+            <label htmlFor="title" className="text-sm font-medium">
+              Title *
+            </label>
             <Input
-              placeholder="Task title"
+              id="title"
+              placeholder="Enter task title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
             />
           </div>
 
-          <div>
-            <textarea
-              className="w-full p-2 border border-gray-300 rounded-md resize-none"
-              placeholder="Task description (optional)"
-              rows={3}
+          <div className="space-y-2">
+            <label htmlFor="description" className="text-sm font-medium">
+              Description
+            </label>
+            <Textarea
+              id="description"
+              placeholder="Enter task description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              rows={3}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label htmlFor="priority" className="text-sm font-medium">
+                Priority
+              </label>
               <Select
                 value={priority}
                 onValueChange={(value: TaskPriority) => setPriority(value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Priority" />
+                  <SelectValue placeholder="Select priority" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Select
-                value={status}
-                onValueChange={(value: TaskStatus) => setStatus(value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todo">To Do</SelectItem>
-                  <SelectItem value="in-progress">In Progress</SelectItem>
-                  <SelectItem value="done">Done</SelectItem>
+                  <SelectItem value={TASK_PRIORITIES.LOW}>Low</SelectItem>
+                  <SelectItem value={TASK_PRIORITIES.MEDIUM}>Medium</SelectItem>
+                  <SelectItem value={TASK_PRIORITIES.HIGH}>High</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={handleClose}>
+          {createTaskMutation.error && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-red-600 text-sm bg-red-50 dark:bg-red-900/20 p-3 rounded-md"
+            >
+              {createTaskMutation.error.message}
+            </motion.div>
+          )}
+
+          <div className="flex justify-end gap-3 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              disabled={createTaskMutation.isPending}
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={createTaskMutation.isPending}>
-              {createTaskMutation.isPending ? "Creating..." : "Create Task"}
+            <Button
+              type="submit"
+              disabled={createTaskMutation.isPending || !title.trim()}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {createTaskMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Task
+                </>
+              )}
             </Button>
           </div>
-        </form>
+        </motion.form>
       </DialogContent>
     </Dialog>
   );
