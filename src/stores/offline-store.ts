@@ -74,5 +74,5 @@ export const useOfflineStore = create<OfflineStore>()(
 if (typeof window !== "undefined") {
   setInterval(() => {
     useOfflineStore.getState().checkOnlineStatus();
-  }, 3000);
+  }, 5000);
 }
