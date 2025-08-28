@@ -120,3 +120,19 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Fix toast description text color visibility */
+[data-sonner-toaster] [data-description] {
+  opacity: 0.8 !important;
+  color: var(--foreground) !important;
+}
+
+/* Make toast descriptions darker in light mode */
+:root [data-sonner-toaster] [data-description] {
+  color: oklch(0.3 0 0) !important;
+}
+
+/* Keep original color in dark mode */
+.dark [data-sonner-toaster] [data-description] {
+  color: oklch(0.8 0 0) !important;
+}
