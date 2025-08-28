@@ -20,10 +20,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCreateTask } from "@/hooks/api/use-tasks";
-import { QUERY_KEYS, TASK_PRIORITIES, TASK_STATUSES } from "@/lib/constants";
+import { TASK_PRIORITIES } from "@/lib/constants";
 import { Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import type { Task, TaskPriority, TaskStatus } from "@/types";
+import type { TaskPriority } from "@/types";
 
 interface CreateTaskModalProps {
   open: boolean;
@@ -58,7 +58,7 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
           setPriority("medium");
           onOpenChange(false);
         },
-        onError: (error) => {
+        onError: () => {
           toast.error("Failed to create task", {
             description:
               "Sorry, there was an issue creating the task. Please try again.",

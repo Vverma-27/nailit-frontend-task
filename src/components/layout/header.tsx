@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
   Select,
@@ -16,6 +15,7 @@ import { useAppStore } from "@/stores/app-store";
 import { OfflineIndicator } from "@/components/layout/offline-indicator";
 import { LogOut, Search, Plus, Moon, Sun, Filter } from "lucide-react";
 import { motion } from "framer-motion";
+import { TaskPriority } from "@/types";
 
 interface HeaderProps {
   onCreateTask: () => void;
@@ -70,7 +70,7 @@ export function Header({ onCreateTask }: HeaderProps) {
 
           <Select
             value={priorityFilter}
-            onValueChange={(value: any) => setPriorityFilter(value)}
+            onValueChange={(value) => setPriorityFilter(value as TaskPriority)}
           >
             <SelectTrigger className="w-[140px]">
               <Filter className="w-4 h-4 mr-2" />
@@ -154,7 +154,9 @@ export function Header({ onCreateTask }: HeaderProps) {
           <div className="flex items-center gap-2 flex-shrink-0">
             <Select
               value={priorityFilter}
-              onValueChange={(value: any) => setPriorityFilter(value)}
+              onValueChange={(value) =>
+                setPriorityFilter(value as TaskPriority)
+              }
             >
               <SelectTrigger className="w-[120px] min-w-fit flex-shrink-0">
                 <div className="flex items-center gap-0.5">
@@ -246,7 +248,7 @@ export function Header({ onCreateTask }: HeaderProps) {
 
           <Select
             value={priorityFilter}
-            onValueChange={(value: any) => setPriorityFilter(value)}
+            onValueChange={(value) => setPriorityFilter(value as TaskPriority)}
           >
             <SelectTrigger className="w-16 h-8 px-2 flex-shrink-0">
               <Filter className="w-3.5 h-3.5" />

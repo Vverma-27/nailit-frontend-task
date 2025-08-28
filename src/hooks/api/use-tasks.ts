@@ -55,14 +55,14 @@ export function useCreateTask() {
 
       return { previousTasks, optimisticTask };
     },
-    onError: (error, newTask, context) => {
+    onError: (_, __, context) => {
       // Only revert optimistic updates if we're online (real API error)
       // When offline, keep the optimistic task since it's queued for later sync
       if (isOnline && context?.previousTasks) {
         queryClient.setQueryData(QUERY_KEYS.TASKS, context.previousTasks);
       }
     },
-    onSuccess: (createdTask, variables, context) => {
+    onSuccess: (createdTask, __, context) => {
       // Replace optimistic task with real task from server (only when online)
       if (isOnline && context?.optimisticTask) {
         queryClient.setQueryData<Task[]>(QUERY_KEYS.TASKS, (old) =>
@@ -97,7 +97,7 @@ export function useUpdateTask() {
     },
     retry: false,
     // Note: onError handling is done at the component level for drag operations
-    onSuccess: (updatedTask, variables, context) => {
+    onSuccess: (updatedTask, __, ___) => {
       // Update with the server response to ensure consistency while maintaining order
       queryClient.setQueryData<Task[]>(QUERY_KEYS.TASKS, (old) => {
         if (!old) return [updatedTask];
@@ -141,16 +141,11 @@ export function useDeleteTask() {
 
       return { previousTasks, deletedTaskId: id };
     },
-    onError: (error, id, context) => {
+    onError: (_, __, context) => {
       // Revert the optimistic update on error
       if (context?.previousTasks) {
         queryClient.setQueryData(QUERY_KEYS.TASKS, context.previousTasks);
       }
     },
-    onSuccess: (result, deletedId, context) => {
-      // Task was successfully deleted, no need to revert or refetch
-      // The optimistic update already removed it from the UI
-    },
-    // Don't invalidate on settled to avoid unnecessary refetching
   });
 }

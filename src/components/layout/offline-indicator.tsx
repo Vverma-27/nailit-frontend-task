@@ -5,17 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useOfflineQueue } from "@/hooks/use-offline-queue";
 import { offlineQueueService } from "@/lib/offline-queue-service";
-import {
-  Wifi,
-  WifiOff,
-  RefreshCw,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-} from "lucide-react";
+import { Wifi, WifiOff, RefreshCw, Clock, CheckCircle } from "lucide-react";
 
 export function OfflineIndicator() {
-  const { isOnline, queue, queuedCount } = useOfflineQueue();
+  const { isOnline, queuedCount } = useOfflineQueue();
 
   const handleRetryQueue = async () => {
     if (isOnline) {

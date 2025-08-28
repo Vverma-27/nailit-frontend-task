@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { login, logout, type LoginCredentials } from "@/api/auth";
+import { login, logout } from "@/api/auth";
 import { useAuthStore } from "@/stores/auth-store";
 import { STORAGE_KEYS } from "@/lib/constants";
 

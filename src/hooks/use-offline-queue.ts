@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useOfflineStore } from "@/stores/offline-store";
 import { offlineQueueService } from "@/lib/offline-queue-service";
-import { QUERY_KEYS } from "@/lib/constants";
+import { CreateTaskInput, UpdateTaskInput } from "@/types";
 
 export function useOfflineQueue() {
   const { isOnline, queue } = useOfflineStore();
@@ -25,7 +25,7 @@ export function useOfflineQueue() {
   const queueAction = (
     type: "CREATE" | "UPDATE" | "DELETE",
     taskId?: string,
-    data?: any
+    data?: CreateTaskInput | UpdateTaskInput
   ) => {
     return offlineQueueService.queueAction(type, taskId, data);
   };

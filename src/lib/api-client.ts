@@ -39,7 +39,7 @@ class ApiClient {
     if (contentType && contentType.includes("application/json")) {
       return response.json();
     }
-    return response.text() as any;
+    return response.text() as T;
   }
 
   async get<T>(endpoint: string): Promise<T> {

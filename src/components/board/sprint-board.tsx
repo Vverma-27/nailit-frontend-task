@@ -10,7 +10,6 @@ import {
   DragStartEvent,
   closestCorners,
 } from "@dnd-kit/core";
-import { arrayMove } from "@dnd-kit/sortable";
 import { useQueryClient } from "@tanstack/react-query";
 import { Header } from "@/components/layout/header";
 import { TaskColumn } from "@/components/board/task-column";
@@ -219,7 +218,7 @@ export function SprintBoard() {
     });
 
     // Prepare update data
-    const updateData: any = { status: newStatus, order: newOrder };
+    const updateData = { status: newStatus, order: newOrder };
 
     // Call the mutation for server sync
     updateTaskMutation(
@@ -228,7 +227,7 @@ export function SprintBoard() {
         data: updateData,
       },
       {
-        onError: (error) => {
+        onError: () => {
           // Revert to original position on error
           queryClient.setQueryData<Task[]>(QUERY_KEYS.TASKS, (old) => {
             if (!old) return [draggedTask];

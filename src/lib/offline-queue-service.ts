@@ -1,6 +1,5 @@
 import { useOfflineStore } from "@/stores/offline-store";
 import { createTask, updateTask, deleteTask } from "@/api/tasks";
-import { generateId } from "./utils";
 import { QUERY_KEYS } from "./constants";
 import type { QueryClient } from "@tanstack/react-query";
 import type {
