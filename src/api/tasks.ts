@@ -1,61 +1,59 @@
-import { Task, CreateTaskInput, UpdateTaskInput } from "@/types";
+import { apiClient } from "@/lib/api-client";
+import type { Task, CreateTaskInput, UpdateTaskInput } from "@/types";
 
-const API_BASE_URL = "http://localhost:3001";
+export async function getTasks(): Promise<Task[]> {
+  return apiClient.get<Task[]>("/tasks");
+}
 
-export const tasksApi = {
-  async getAllTasks(): Promise<Task[]> {
-    const response = await fetch(`${API_BASE_URL}/tasks`);
-    if (!response.ok) {
-      throw new Error("Failed to fetch tasks");
-    }
-    return response.json();
-  },
+export async function getTask(id: string): Promise<Task> {
+  return apiClient.get<Task>(`/tasks/${id}`);
+}
 
-  async createTask(task: CreateTaskInput): Promise<Task> {
-    const response = await fetch(`${API_BASE_URL}/tasks`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ...task,
-        id: crypto.randomUUID().substring(0, 8),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }),
-    });
+export async function createTask(data: CreateTaskInput): Promise<Task> {
+  let order = data.order;
+  if (order === undefined) {
+    const allTasks = await getTasks();
+    const targetStatus = data.status || "todo";
+    const tasksInStatus = allTasks.filter(
+      (task) => task.status === targetStatus
+    );
+    order =
+      tasksInStatus.length > 0
+        ? Math.max(...tasksInStatus.map((t) => t.order)) + 1
+        : 0;
+  }
 
-    if (!response.ok) {
-      throw new Error("Failed to create task");
-    }
-    return response.json();
-  },
+  const taskData = {
+    ...data,
+    status: data.status || "todo",
+    order,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  return apiClient.post<Task>("/tasks", taskData);
+}
 
-  async updateTask(id: string, updates: UpdateTaskInput): Promise<Task> {
-    const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ...updates,
-        updatedAt: new Date().toISOString(),
-      }),
-    });
+export async function updateTask(
+  id: string,
+  data: UpdateTaskInput
+): Promise<Task> {
+  const updateData = {
+    ...data,
+    updatedAt: new Date().toISOString(),
+  };
+  const res = await apiClient.patch<Task>(`/tasks/${id}`, updateData);
+  return res;
+}
 
-    if (!response.ok) {
-      throw new Error("Failed to update task");
-    }
-    return response.json();
-  },
+export async function deleteTask(id: string): Promise<void> {
+  return apiClient.delete<void>(`/tasks/${id}`);
+}
 
-  async deleteTask(id: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
-      method: "DELETE",
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to delete task");
-    }
-  },
-};
+export async function reorderTasks(
+  updates: Array<{ id: string; order: number }>
+): Promise<Task[]> {
+  const updatePromises = updates.map(({ id, order }) =>
+    updateTask(id, { order })
+  );
+  return Promise.all(updatePromises);
+}
