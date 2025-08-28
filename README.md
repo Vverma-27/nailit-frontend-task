@@ -140,4 +140,4 @@ To solve this, I implemented a more robust offline detection strategy:
 
 ## Time Spent
 
-**Total Development Time: approx 2.5 hours**
+**Total Development Time: approx 2.5-3 hours**
