@@ -1,10 +1,12 @@
 "use client";
 
+import { Header } from "@/components/layout/header";
+
 export default function BoardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
+      <Header />
       <div className="p-6">
-        <h1 className="text-2xl font-bold mb-6">Sprint Board</h1>
         <div className="grid grid-cols-3 gap-6">
           <div className="bg-white rounded-lg p-4 shadow-sm">
             <h2 className="font-semibold mb-4 text-gray-700">To Do</h2>
