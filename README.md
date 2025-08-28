@@ -24,9 +24,7 @@ A modern task management application built with Next.js featuring drag-and-drop 
 - **Data Fetching**: React Query (TanStack Query)
 - **Drag & Drop**: @dnd-kit
 - **Animations**: Framer Motion
-- **Backend**: JSON Server (mock API)
-- **Icons**: Lucide React
-- **Notifications**: Sonner
+- **Backend**: JSON Server (deployed to vercel separately)
 
 ## Setup and Installation
 
