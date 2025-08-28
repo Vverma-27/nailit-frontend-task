@@ -1,7 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { STORAGE_KEYS } from "@/lib/constants";
-import { generateId, isOnline } from "@/lib/utils";
+import {
+  generateId,
+  isOnline as isOnlineAsync,
+  isOnlineSync,
+} from "@/lib/utils";
 import type {
   OfflineState,
   QueuedAction,
@@ -19,12 +23,17 @@ interface OfflineStore extends OfflineState {
   removeFromQueue: (actionId: string) => void;
   clearQueue: () => void;
   getQueuedTaskIds: () => string[];
+  checkOnlineStatus: () => Promise<void>;
 }
 
 export const useOfflineStore = create<OfflineStore>()(
   persist(
     (set, get) => ({
-      isOnline: isOnline(),
+      isOnline: isOnlineSync(),
+      checkOnlineStatus: async () => {
+        const isOnline = await isOnlineAsync();
+        set({ isOnline });
+      },
       queue: [],
       setOnlineStatus: (isOnline: boolean) => set({ isOnline }),
       queueAction: (type, taskId, data) => {
@@ -63,11 +72,7 @@ export const useOfflineStore = create<OfflineStore>()(
 );
 
 if (typeof window !== "undefined") {
-  window.addEventListener("online", () => {
-    useOfflineStore.getState().setOnlineStatus(true);
-  });
-
-  window.addEventListener("offline", () => {
-    useOfflineStore.getState().setOnlineStatus(false);
-  });
+  setInterval(() => {
+    useOfflineStore.getState().checkOnlineStatus();
+  }, 5000);
 }
