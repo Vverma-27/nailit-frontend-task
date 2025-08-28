@@ -23,7 +23,7 @@ const getPriorityColor = (priority: TaskPriority) => {
 
 export function TaskCard({ task, onClick }: TaskCardProps) {
   return (
-    <Card 
+    <Card
       className="cursor-pointer hover:shadow-md transition-shadow"
       onClick={onClick}
     >

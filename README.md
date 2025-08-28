@@ -28,32 +28,37 @@ A modern, responsive task management application built with Next.js, featuring d
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - pnpm (recommended) or npm
 
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone <repository-url>
 cd nailit-frontend-assignment
 ```
 
 2. Install dependencies:
+
 ```bash
 pnpm install
 ```
 
 3. Start the development servers:
+
 ```bash
 pnpm run dev:all
 ```
 
 This will start both:
+
 - Next.js development server on `http://localhost:3000`
 - JSON Server API on `http://localhost:3001`
 
 Alternatively, you can run them separately:
+
 ```bash
 # Terminal 1: Start the API server
 pnpm run json-server

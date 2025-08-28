@@ -27,12 +27,7 @@ export function DraggableTaskCard({ task, onClick }: DraggableTaskCardProps) {
   };
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-    >
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <TaskCard task={task} onClick={onClick} />
     </div>
   );

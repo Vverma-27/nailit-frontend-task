@@ -21,8 +21,12 @@ export function Header() {
     <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Sprint Board</h1>
-          <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">Manage your tasks efficiently</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+            Sprint Board
+          </h1>
+          <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">
+            Manage your tasks efficiently
+          </p>
         </div>
         <div className="flex items-center space-x-2 sm:space-x-4">
           <Button size="sm" onClick={() => setIsCreateModalOpen(true)}>
@@ -34,8 +38,8 @@ export function Header() {
           </Button>
         </div>
       </div>
-      
-      <CreateTaskModal 
+
+      <CreateTaskModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
       />

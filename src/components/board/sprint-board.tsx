@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from "@dnd-kit/core";
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+} from "@dnd-kit/core";
 import { tasksApi } from "@/api/tasks";
 import { TaskColumn } from "./task-column";
 import { TaskCard } from "@/components/task/task-card";
@@ -12,10 +17,14 @@ import { toast } from "sonner";
 export function SprintBoard() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
-  
+
   const queryClient = useQueryClient();
 
-  const { data: tasks = [], isLoading, error } = useQuery({
+  const {
+    data: tasks = [],
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["tasks"],
     queryFn: tasksApi.getAllTasks,
   });
@@ -44,7 +53,7 @@ export function SprintBoard() {
 
     const taskId = active.id as string;
     const newStatus = over.id as TaskStatus;
-    
+
     const task = tasks.find((t) => t.id === taskId);
     if (!task || task.status === newStatus) return;
 
@@ -94,7 +103,7 @@ export function SprintBoard() {
           />
         </div>
       </div>
-      
+
       <DragOverlay>
         {activeTask ? <TaskCard task={activeTask} /> : null}
       </DragOverlay>

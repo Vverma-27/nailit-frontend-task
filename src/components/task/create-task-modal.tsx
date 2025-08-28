@@ -2,10 +2,21 @@
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { tasksApi } from "@/api/tasks";
 import { CreateTaskInput, TaskPriority, TaskStatus } from "@/types";
 import { toast } from "sonner";
@@ -16,7 +27,11 @@ interface CreateTaskModalProps {
   defaultStatus?: TaskStatus;
 }
 
-export function CreateTaskModal({ isOpen, onClose, defaultStatus = "todo" }: CreateTaskModalProps) {
+export function CreateTaskModal({
+  isOpen,
+  onClose,
+  defaultStatus = "todo",
+}: CreateTaskModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<TaskPriority>("medium");
@@ -38,7 +53,7 @@ export function CreateTaskModal({ isOpen, onClose, defaultStatus = "todo" }: Cre
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!title.trim()) {
       toast.error("Please enter a task title");
       return;
@@ -68,7 +83,7 @@ export function CreateTaskModal({ isOpen, onClose, defaultStatus = "todo" }: Cre
         <DialogHeader>
           <DialogTitle>Create New Task</DialogTitle>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Input
@@ -78,7 +93,7 @@ export function CreateTaskModal({ isOpen, onClose, defaultStatus = "todo" }: Cre
               required
             />
           </div>
-          
+
           <div>
             <textarea
               className="w-full p-2 border border-gray-300 rounded-md resize-none"
@@ -88,10 +103,13 @@ export function CreateTaskModal({ isOpen, onClose, defaultStatus = "todo" }: Cre
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Select value={priority} onValueChange={(value: TaskPriority) => setPriority(value)}>
+              <Select
+                value={priority}
+                onValueChange={(value: TaskPriority) => setPriority(value)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Priority" />
                 </SelectTrigger>
@@ -102,9 +120,12 @@ export function CreateTaskModal({ isOpen, onClose, defaultStatus = "todo" }: Cre
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div>
-              <Select value={status} onValueChange={(value: TaskStatus) => setStatus(value)}>
+              <Select
+                value={status}
+                onValueChange={(value: TaskStatus) => setStatus(value)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
@@ -116,15 +137,12 @@ export function CreateTaskModal({ isOpen, onClose, defaultStatus = "todo" }: Cre
               </Select>
             </div>
           </div>
-          
+
           <div className="flex justify-end space-x-2 pt-4">
             <Button type="button" variant="outline" onClick={handleClose}>
               Cancel
             </Button>
-            <Button 
-              type="submit" 
-              disabled={createTaskMutation.isPending}
-            >
+            <Button type="submit" disabled={createTaskMutation.isPending}>
               {createTaskMutation.isPending ? "Creating..." : "Create Task"}
             </Button>
           </div>
