@@ -38,7 +38,7 @@ export default function LoginPage() {
               type="password"
               placeholder="Password"
               value={password}
-              onChange={(e) => setPassword(e.target.vallue)}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
           <Button onClick={handleLogin} className="w-full">
