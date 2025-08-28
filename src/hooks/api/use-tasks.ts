@@ -4,6 +4,7 @@ import { QUERY_KEYS } from "@/lib/constants";
 import { useOfflineStore } from "@/stores/offline-store";
 import { useOfflineQueue } from "@/hooks/use-offline-queue";
 import type { Task, CreateTaskInput, UpdateTaskInput } from "@/types";
+import { API_ERROR_CODES, ApiError } from "@/lib/api-client";
 
 export function useTasks() {
   return useQuery({
@@ -15,7 +16,7 @@ export function useTasks() {
 
 export function useCreateTask() {
   const queryClient = useQueryClient();
-  const { isOnline } = useOfflineStore();
+  const { isOnline, setOnlineStatus } = useOfflineStore();
   const { queueAction } = useOfflineQueue();
 
   return useMutation({
@@ -53,11 +54,17 @@ export function useCreateTask() {
         queueAction("CREATE", optimisticTask.id, newTask);
       }
 
-      return { previousTasks, optimisticTask };
+      return { previousTasks, optimisticTask, newTask };
     },
-    onError: (_, __, context) => {
-      // Only revert optimistic updates if we're online (real API error)
-      // When offline, keep the optimistic task since it's queued for later sync
+    retry: false,
+    onError: (err, __, context) => {
+      if (err instanceof ApiError) {
+        if ((err.code = API_ERROR_CODES.NETWORK_ERROR)) {
+          setOnlineStatus(false);
+          queueAction("CREATE", context?.optimisticTask.id, context?.newTask);
+        }
+        return;
+      }
       if (isOnline && context?.previousTasks) {
         queryClient.setQueryData(QUERY_KEYS.TASKS, context.previousTasks);
       }
@@ -78,7 +85,7 @@ export function useCreateTask() {
 
 export function useUpdateTask() {
   const queryClient = useQueryClient();
-  const { isOnline } = useOfflineStore();
+  const { isOnline, setOnlineStatus } = useOfflineStore();
   const { queueAction } = useOfflineQueue();
 
   return useMutation({
@@ -111,17 +118,25 @@ export function useUpdateTask() {
         return newTasks;
       });
     },
-    // Don't invalidate on settled to avoid refetching and causing flicker
+    onError: (err, _, context) => {
+      if (err instanceof ApiError) {
+        if ((err.code = API_ERROR_CODES.NETWORK_ERROR)) {
+          setOnlineStatus(false);
+          queueAction("UPDATE", context?.taskId, context?.taskData);
+        }
+      }
+    },
   });
 }
 
 export function useDeleteTask() {
   const queryClient = useQueryClient();
-  const { isOnline } = useOfflineStore();
+  const { isOnline, setOnlineStatus } = useOfflineStore();
   const { queueAction } = useOfflineQueue();
 
   return useMutation({
     mutationFn: deleteTask,
+    retry: false,
     onMutate: async (id: string) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: QUERY_KEYS.TASKS });
@@ -141,7 +156,14 @@ export function useDeleteTask() {
 
       return { previousTasks, deletedTaskId: id };
     },
-    onError: (_, __, context) => {
+    onError: (err, _, context) => {
+      if (err instanceof ApiError) {
+        if ((err.code = API_ERROR_CODES.NETWORK_ERROR)) {
+          setOnlineStatus(false);
+          queueAction("DELETE", context?.deletedTaskId);
+        }
+        return;
+      }
       // Revert the optimistic update on error
       if (context?.previousTasks) {
         queryClient.setQueryData(QUERY_KEYS.TASKS, context.previousTasks);

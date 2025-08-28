@@ -25,6 +25,7 @@ import { Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import type { TaskPriority } from "@/types";
 import { generateId } from "@/lib/utils";
+import { API_ERROR_CODES, ApiError } from "@/lib/api-client";
 
 interface CreateTaskModalProps {
   open: boolean;
@@ -60,7 +61,20 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
           setPriority("medium");
           onOpenChange(false);
         },
-        onError: () => {
+        onError: (err) => {
+          if (err instanceof ApiError) {
+            if ((err.code = API_ERROR_CODES.NETWORK_ERROR)) {
+              // Reset form
+              setTitle("");
+              setDescription("");
+              setPriority("medium");
+              onOpenChange(false);
+              toast.error("Network request failed", {
+                description: "You are offline. We have queued your request.",
+              });
+            }
+            return;
+          }
           toast.error("Failed to create task", {
             description:
               "Sorry, there was an issue creating the task. Please try again.",

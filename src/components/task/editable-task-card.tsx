@@ -23,6 +23,7 @@ import type { Task, TaskPriority } from "@/types";
 import { QUERY_KEYS, TASK_PRIORITIES_LIST } from "@/lib/constants";
 import { useOfflineStore } from "@/stores/offline-store";
 import { useQueryClient } from "@tanstack/react-query";
+import { API_ERROR_CODES, ApiError } from "@/lib/api-client";
 
 interface EditableTaskCardProps {
   task: Task;
@@ -35,8 +36,8 @@ export function EditableTaskCard({ task }: EditableTaskCardProps) {
   const [priority, setPriority] = useState(task.priority);
   const queryClient = useQueryClient();
 
-  const { mutate: updateTask } = useUpdateTask();
-  const { mutate: deleteTask } = useDeleteTask();
+  const { mutate: updateTask, isPending: updatePending } = useUpdateTask();
+  const { mutate: deleteTask, isPending: deletePending } = useDeleteTask();
   const { isOnline, getQueuedTaskIds, queueAction } = useOfflineStore();
 
   // Check if this task has any queued actions or is a temporary task
@@ -63,6 +64,7 @@ export function EditableTaskCard({ task }: EditableTaskCardProps) {
   };
 
   const handleSave = () => {
+    if (deletePending || updatePending) return;
     if (!isOnline) {
       queryClient.setQueryData<Task[]>(QUERY_KEYS.TASKS, (old) => {
         if (!old) return [task];
@@ -95,7 +97,16 @@ export function EditableTaskCard({ task }: EditableTaskCardProps) {
           setIsEditing(false);
           toast.success("Task updated successfully");
         },
-        onError: () => {
+        onError: (err) => {
+          if (err instanceof ApiError) {
+            if ((err.code = API_ERROR_CODES.NETWORK_ERROR)) {
+              setIsEditing(false);
+            }
+            toast.error("Network request failed", {
+              description: "You are offline. We have queued your request.",
+            });
+            return;
+          }
           toast.error("Failed to update task");
         },
       }
@@ -110,6 +121,7 @@ export function EditableTaskCard({ task }: EditableTaskCardProps) {
   };
 
   const handleDelete = () => {
+    if (deletePending || updatePending) return;
     if (!isOnline) {
       queryClient.setQueryData<Task[]>(QUERY_KEYS.TASKS, (old) => {
         if (!old) return [];
@@ -122,7 +134,16 @@ export function EditableTaskCard({ task }: EditableTaskCardProps) {
       onSuccess: () => {
         toast.success("Task deleted successfully");
       },
-      onError: () => {
+      onError: (err) => {
+        if (err instanceof ApiError) {
+          if ((err.code = API_ERROR_CODES.NETWORK_ERROR)) {
+            setIsEditing(false);
+          }
+          toast.error("Network request failed", {
+            description: "You are offline. We have queued your request.",
+          });
+          return;
+        }
         toast.error("Failed to delete task");
       },
     });

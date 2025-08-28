@@ -1,10 +1,20 @@
 import { API_BASE_URL, STORAGE_KEYS } from "@/lib/constants";
 import { simulateNetworkFailure } from "@/lib/utils";
 
+export enum API_ERROR_CODES {
+  NETWORK_ERROR = "NETWORK_ERROR",
+  TIMEOUT = "TIMEOUT",
+}
+
 export class ApiError extends Error {
-  constructor(message: string, public status: number, public code?: string) {
+  constructor(
+    message: string,
+    public status: number,
+    public code?: API_ERROR_CODES
+  ) {
     super(message);
     this.name = "ApiError";
+    this.code = code;
   }
 }
 
@@ -21,6 +31,37 @@ class ApiClient {
       "Content-Type": "application/json",
       ...(token && { Authorization: `Bearer ${token}` }),
     };
+  }
+
+  private async fetchWithTimeout(
+    input: RequestInfo,
+    init?: RequestInit,
+    timeout = 5000
+  ): Promise<Response> {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+
+    try {
+      const response = await fetch(input, {
+        ...init,
+        signal: controller.signal,
+      });
+      return response;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        throw new ApiError("Request timed out", 0, API_ERROR_CODES.TIMEOUT);
+      }
+      if (err instanceof TypeError) {
+        throw new ApiError(
+          "Network request failed",
+          0,
+          API_ERROR_CODES.NETWORK_ERROR
+        );
+      }
+      throw err;
+    } finally {
+      clearTimeout(id);
+    }
   }
 
   private async handleResponse<T>(response: Response): Promise<T> {
@@ -43,11 +84,25 @@ class ApiClient {
   }
 
   async get<T>(endpoint: string): Promise<T> {
-    const response = await fetch(`${this.baseURL}${endpoint}`, {
-      method: "GET",
-      headers: this.getAuthHeaders(),
-    });
-    return this.handleResponse<T>(response);
+    try {
+      const response = await this.fetchWithTimeout(
+        `${this.baseURL}${endpoint}`,
+        {
+          method: "GET",
+          headers: this.getAuthHeaders(),
+        }
+      );
+      return this.handleResponse<T>(response);
+    } catch (err: any) {
+      if (err instanceof TypeError) {
+        throw new ApiError(
+          "Network request failed",
+          0,
+          API_ERROR_CODES.NETWORK_ERROR
+        );
+      }
+      throw err;
+    }
   }
 
   async post<T>(
@@ -55,17 +110,34 @@ class ApiClient {
     data: unknown,
     isRetry: boolean = false
   ): Promise<T> {
-    // Simulate 10% failure rate for POST requests
     if (simulateNetworkFailure() && !isRetry) {
-      throw new ApiError("Simulated network failure", 500, "NETWORK_ERROR");
+      throw new ApiError(
+        "Simulated network failure",
+        500,
+        API_ERROR_CODES.NETWORK_ERROR
+      );
     }
 
-    const response = await fetch(`${this.baseURL}${endpoint}`, {
-      method: "POST",
-      headers: this.getAuthHeaders(),
-      body: JSON.stringify(data),
-    });
-    return this.handleResponse<T>(response);
+    try {
+      const response = await this.fetchWithTimeout(
+        `${this.baseURL}${endpoint}`,
+        {
+          method: "POST",
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify(data),
+        }
+      );
+      return this.handleResponse<T>(response);
+    } catch (err: any) {
+      if (err instanceof TypeError) {
+        throw new ApiError(
+          "Network request failed",
+          0,
+          API_ERROR_CODES.NETWORK_ERROR
+        );
+      }
+      throw err;
+    }
   }
 
   async patch<T>(
@@ -73,25 +145,56 @@ class ApiClient {
     data: unknown,
     isRetry: boolean = false
   ): Promise<T> {
-    // Simulate 10% failure rate for PATCH requests
     if (simulateNetworkFailure() && !isRetry) {
-      throw new ApiError("Simulated network failure", 500, "NETWORK_ERROR");
+      throw new ApiError(
+        "Simulated network failure",
+        500,
+        API_ERROR_CODES.NETWORK_ERROR
+      );
     }
 
-    const response = await fetch(`${this.baseURL}${endpoint}`, {
-      method: "PATCH",
-      headers: this.getAuthHeaders(),
-      body: JSON.stringify(data),
-    });
-    return this.handleResponse<T>(response);
+    try {
+      const response = await this.fetchWithTimeout(
+        `${this.baseURL}${endpoint}`,
+        {
+          method: "PATCH",
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify(data),
+        }
+      );
+      return this.handleResponse<T>(response);
+    } catch (err: any) {
+      if (err instanceof TypeError) {
+        throw new ApiError(
+          "Network request failed",
+          0,
+          API_ERROR_CODES.NETWORK_ERROR
+        );
+      }
+      throw err;
+    }
   }
 
   async delete<T>(endpoint: string): Promise<T> {
-    const response = await fetch(`${this.baseURL}${endpoint}`, {
-      method: "DELETE",
-      headers: this.getAuthHeaders(),
-    });
-    return this.handleResponse<T>(response);
+    try {
+      const response = await this.fetchWithTimeout(
+        `${this.baseURL}${endpoint}`,
+        {
+          method: "DELETE",
+          headers: this.getAuthHeaders(),
+        }
+      );
+      return this.handleResponse<T>(response);
+    } catch (err: any) {
+      if (err instanceof TypeError) {
+        throw new ApiError(
+          "Network request failed",
+          0,
+          API_ERROR_CODES.NETWORK_ERROR
+        );
+      }
+      throw err;
+    }
   }
 }
 
