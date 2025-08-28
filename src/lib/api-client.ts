@@ -47,18 +47,19 @@ class ApiClient {
         signal: controller.signal,
       });
       return response;
-    } catch (err: any) {
-      if (err.name === "AbortError") {
+    } catch (err: unknown) {
+      const error = err as Error;
+      if (error.name === "AbortError") {
         throw new ApiError("Request timed out", 0, API_ERROR_CODES.TIMEOUT);
       }
-      if (err instanceof TypeError) {
+      if (error instanceof TypeError) {
         throw new ApiError(
           "Network request failed",
           0,
           API_ERROR_CODES.NETWORK_ERROR
         );
       }
-      throw err;
+      throw error;
     } finally {
       clearTimeout(id);
     }
@@ -93,15 +94,16 @@ class ApiClient {
         }
       );
       return this.handleResponse<T>(response);
-    } catch (err: any) {
-      if (err instanceof TypeError) {
+    } catch (err: unknown) {
+      const error = err as Error;
+      if (error instanceof TypeError) {
         throw new ApiError(
           "Network request failed",
           0,
           API_ERROR_CODES.NETWORK_ERROR
         );
       }
-      throw err;
+      throw error;
     }
   }
 
@@ -128,15 +130,16 @@ class ApiClient {
         }
       );
       return this.handleResponse<T>(response);
-    } catch (err: any) {
-      if (err instanceof TypeError) {
+    } catch (err: unknown) {
+      const error = err as Error;
+      if (error instanceof TypeError) {
         throw new ApiError(
           "Network request failed",
           0,
           API_ERROR_CODES.NETWORK_ERROR
         );
       }
-      throw err;
+      throw error;
     }
   }
 
@@ -163,15 +166,16 @@ class ApiClient {
         }
       );
       return this.handleResponse<T>(response);
-    } catch (err: any) {
-      if (err instanceof TypeError) {
+    } catch (err: unknown) {
+      const error = err as Error;
+      if (error instanceof TypeError) {
         throw new ApiError(
           "Network request failed",
           0,
           API_ERROR_CODES.NETWORK_ERROR
         );
       }
-      throw err;
+      throw error;
     }
   }
 
@@ -185,15 +189,16 @@ class ApiClient {
         }
       );
       return this.handleResponse<T>(response);
-    } catch (err: any) {
-      if (err instanceof TypeError) {
+    } catch (err: unknown) {
+      const error = err as Error
+      if (error instanceof TypeError) {
         throw new ApiError(
           "Network request failed",
           0,
           API_ERROR_CODES.NETWORK_ERROR
         );
       }
-      throw err;
+      throw error;
     }
   }
 }
