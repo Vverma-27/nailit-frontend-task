@@ -9,7 +9,7 @@ export function useTasks() {
   return useQuery({
     queryKey: QUERY_KEYS.TASKS,
     queryFn: getTasks,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 }
 
@@ -26,7 +26,6 @@ export function useCreateTask() {
       const previousTasks =
         queryClient.getQueryData<Task[]>(QUERY_KEYS.TASKS) || [];
 
-      // Calculate next order for the target status
       const targetStatus = newTask.status || "todo";
       const tasksInStatus = previousTasks.filter(
         (task) => task.status === targetStatus
