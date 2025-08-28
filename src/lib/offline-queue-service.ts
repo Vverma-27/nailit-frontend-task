@@ -41,7 +41,10 @@ class OfflineQueueService {
       case "CREATE":
         if (action.data && action.taskId) {
           // Create the task on the server
-          const serverTask = await createTask(action.data as CreateTaskInput);
+          const serverTask = await createTask(
+            action.data as CreateTaskInput,
+            true
+          );
 
           // If we have queryClient, replace the temp task with the server task
           if (queryClient) {
@@ -61,7 +64,7 @@ class OfflineQueueService {
         break;
       case "UPDATE":
         if (action.taskId && action.data) {
-          await updateTask(action.taskId, action.data as UpdateTaskInput);
+          await updateTask(action.taskId, action.data as UpdateTaskInput, true);
         }
         break;
       case "DELETE":

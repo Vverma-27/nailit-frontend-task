@@ -9,7 +9,10 @@ export async function getTask(id: string): Promise<Task> {
   return apiClient.get<Task>(`/tasks/${id}`);
 }
 
-export async function createTask(data: CreateTaskInput): Promise<Task> {
+export async function createTask(
+  data: CreateTaskInput,
+  isRetry: boolean = false
+): Promise<Task> {
   let order = data.order;
   if (order === undefined) {
     const allTasks = await getTasks();
@@ -30,18 +33,19 @@ export async function createTask(data: CreateTaskInput): Promise<Task> {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
-  return apiClient.post<Task>("/tasks", taskData);
+  return apiClient.post<Task>("/tasks", taskData, isRetry);
 }
 
 export async function updateTask(
   id: string,
-  data: UpdateTaskInput
+  data: UpdateTaskInput,
+  isRetry: boolean = false
 ): Promise<Task> {
   const updateData = {
     ...data,
     updatedAt: new Date().toISOString(),
   };
-  const res = await apiClient.patch<Task>(`/tasks/${id}`, updateData);
+  const res = await apiClient.patch<Task>(`/tasks/${id}`, updateData, isRetry);
   return res;
 }
 

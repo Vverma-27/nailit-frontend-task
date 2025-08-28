@@ -50,9 +50,13 @@ class ApiClient {
     return this.handleResponse<T>(response);
   }
 
-  async post<T>(endpoint: string, data: unknown): Promise<T> {
+  async post<T>(
+    endpoint: string,
+    data: unknown,
+    isRetry: boolean = false
+  ): Promise<T> {
     // Simulate 10% failure rate for POST requests
-    if (simulateNetworkFailure()) {
+    if (simulateNetworkFailure() && !isRetry) {
       throw new ApiError("Simulated network failure", 500, "NETWORK_ERROR");
     }
 
@@ -64,9 +68,13 @@ class ApiClient {
     return this.handleResponse<T>(response);
   }
 
-  async patch<T>(endpoint: string, data: unknown): Promise<T> {
+  async patch<T>(
+    endpoint: string,
+    data: unknown,
+    isRetry: boolean = false
+  ): Promise<T> {
     // Simulate 10% failure rate for PATCH requests
-    if (simulateNetworkFailure()) {
+    if (simulateNetworkFailure() && !isRetry) {
       throw new ApiError("Simulated network failure", 500, "NETWORK_ERROR");
     }
 
