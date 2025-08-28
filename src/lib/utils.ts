@@ -19,7 +19,7 @@ export function formatDate(date: string): string {
   });
 }
 
-let isOnlineCache = navigator.onLine;
+let isOnlineCache = true;
 let lastCheckTime = 0;
 const CACHE_DURATION = 5000;
 
