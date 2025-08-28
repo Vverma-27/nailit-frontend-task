@@ -293,7 +293,7 @@ export function SprintBoard() {
           setActiveTask(null);
         }}
       >
-        <main className="p-4 md:p-6">
+        <main className="p-4 md:p-6 md:max-w-[100%] max-w-[88%] mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8 xl:gap-10 2xl:gap-12 mx-auto">
             {COLUMN_CONFIG.map((column, index) => (
               <motion.div
