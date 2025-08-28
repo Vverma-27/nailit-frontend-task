@@ -32,3 +32,22 @@ export interface AuthState {
   isAuthenticated: boolean;
   token: string | null;
 }
+
+export interface QueuedAction {
+  id: string;
+  type: "CREATE" | "UPDATE" | "DELETE";
+  taskId?: string;
+  data?: CreateTaskInput | UpdateTaskInput;
+  timestamp: number;
+}
+
+export interface OfflineState {
+  isOnline: boolean;
+  queue: QueuedAction[];
+}
+
+export interface AppState {
+  darkMode: boolean;
+  searchQuery: string;
+  priorityFilter: TaskPriority | "all";
+}
