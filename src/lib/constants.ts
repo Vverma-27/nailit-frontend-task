@@ -4,7 +4,7 @@ export const QUERY_KEYS = {
 } as const;
 
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 export const STORAGE_KEYS = {
   AUTH_TOKEN: "sprint-board-token",
