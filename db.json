@@ -1,0 +1,44 @@
+{
+  "tasks": [
+    {
+      "id": "1",
+      "title": "Setup project structure",
+      "description": "Initialize the project with proper folder structure and dependencies",
+      "status": "done",
+      "priority": "high",
+      "order": 0,
+      "createdAt": "2024-12-30T10:00:00Z",
+      "updatedAt": "2024-12-30T10:00:00Z"
+    },
+    {
+      "id": "2",
+      "title": "Create login system",
+      "description": "Implement basic authentication flow",
+      "status": "done",
+      "priority": "high",
+      "order": 1,
+      "createdAt": "2024-12-30T11:00:00Z",
+      "updatedAt": "2024-12-30T11:00:00Z"
+    },
+    {
+      "id": "3",
+      "title": "Design task board UI",
+      "description": "Create the main kanban board interface",
+      "status": "in-progress",
+      "priority": "medium",
+      "order": 0,
+      "createdAt": "2024-12-30T12:00:00Z",
+      "updatedAt": "2024-12-30T12:00:00Z"
+    },
+    {
+      "id": "4",
+      "title": "Implement drag and drop",
+      "description": "Add drag and drop functionality for tasks",
+      "status": "todo",
+      "priority": "medium",
+      "order": 0,
+      "createdAt": "2024-12-30T13:00:00Z",
+      "updatedAt": "2024-12-30T13:00:00Z"
+    }
+  ]
+}
