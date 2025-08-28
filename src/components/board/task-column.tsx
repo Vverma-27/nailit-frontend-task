@@ -1,78 +1,96 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { useDroppable } from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { Task, TaskStatus } from "@/types";
-import { DraggableTaskCard } from "./draggable-task-card";
+import { EditableTaskCard } from "@/components/task/editable-task-card";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import type { Task } from "@/types";
 
 interface TaskColumnProps {
-  title: string;
-  status: TaskStatus;
+  column: {
+    id: string;
+    title: string;
+    color: string;
+  };
   tasks: Task[];
-  onTaskClick?: (task: Task) => void;
+  isDraggedOver?: boolean;
 }
 
-const getColumnColor = (status: TaskStatus) => {
-  switch (status) {
-    case "todo":
-      return "border-l-blue-500";
-    case "in-progress":
-      return "border-l-yellow-500";
-    case "done":
-      return "border-l-green-500";
-    default:
-      return "border-l-gray-500";
-  }
-};
-
 export function TaskColumn({
-  title,
-  status,
+  column,
   tasks,
-  onTaskClick,
+  isDraggedOver = false,
 }: TaskColumnProps) {
-  const filteredTasks = tasks.filter((task) => task.status === status);
-
   const { isOver, setNodeRef } = useDroppable({
-    id: status,
+    id: column.id,
   });
 
   return (
-    <div
-      className={`bg-white rounded-lg p-4 shadow-sm border-l-4 ${getColumnColor(
-        status
-      )} ${isOver ? "bg-blue-50" : ""}`}
-    >
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold text-gray-700">{title}</h2>
-        <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
-          {filteredTasks.length}
-        </span>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+          {column.title}
+          <Badge variant="secondary" className="text-xs">
+            {tasks.length}
+          </Badge>
+        </h2>
       </div>
 
-      <div ref={setNodeRef} className="space-y-3 min-h-[200px]">
+      <Card
+        ref={setNodeRef}
+        className={`min-h-[300px] md:min-h-[500px] p-3 md:p-4 transition-colors ${
+          column.color
+        } ${
+          isOver || isDraggedOver
+            ? "ring-2 ring-blue-400 bg-blue-50 dark:bg-blue-900/10"
+            : ""
+        }`}
+      >
         <SortableContext
-          items={filteredTasks.map((task) => task.id)}
           strategy={verticalListSortingStrategy}
+          items={tasks.map((t) => t.id)}
         >
-          {filteredTasks.map((task) => (
-            <DraggableTaskCard
-              key={task.id}
-              task={task}
-              onClick={() => onTaskClick?.(task)}
-            />
-          ))}
-        </SortableContext>
-
-        {filteredTasks.length === 0 && (
-          <div className="text-center text-gray-400 text-sm py-8">
-            No tasks in {title.toLowerCase()}
+          <div className="space-y-2 md:space-y-3">
+            {tasks.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-8 text-gray-500 dark:text-gray-400"
+              >
+                <p className="text-sm">
+                  No tasks in {column.title.toLowerCase()}
+                </p>
+                {(isOver || isDraggedOver) && (
+                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
+                    Drop task here
+                  </p>
+                )}
+              </motion.div>
+            ) : (
+              tasks.map((task, index) => (
+                <motion.div
+                  key={task.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{
+                    opacity: 0,
+                    scale: 0.9,
+                    transition: { duration: 0.2 },
+                  }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <EditableTaskCard task={task} />
+                </motion.div>
+              ))
+            )}
           </div>
-        )}
-      </div>
+        </SortableContext>
+      </Card>
     </div>
   );
 }
