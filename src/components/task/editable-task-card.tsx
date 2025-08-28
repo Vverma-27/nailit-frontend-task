@@ -123,12 +123,13 @@ export function EditableTaskCard({ task }: EditableTaskCardProps) {
               return old.map((t) => (t.id === task.id ? originalTask! : t));
             });
           toast.error("Failed to update task");
+
+          setTitle(task.title);
+          setDescription(task.description);
+          setPriority(task.priority);
         },
       }
     );
-    setTitle(task.title);
-    setDescription(task.description);
-    setPriority(task.priority);
   };
 
   const handleCancel = () => {
