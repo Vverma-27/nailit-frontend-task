@@ -63,7 +63,7 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
         },
         onError: (err) => {
           if (err instanceof ApiError) {
-            if ((err.code = API_ERROR_CODES.NETWORK_ERROR)) {
+            if (err.code === API_ERROR_CODES.NETWORK_ERROR) {
               // Reset form
               setTitle("");
               setDescription("");
@@ -72,8 +72,8 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
               toast.error("Network request failed", {
                 description: "You are offline. We have queued your request.",
               });
+              return;
             }
-            return;
           }
           toast.error("Failed to create task", {
             description:

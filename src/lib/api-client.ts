@@ -3,7 +3,7 @@ import { simulateNetworkFailure } from "@/lib/utils";
 
 export enum API_ERROR_CODES {
   NETWORK_ERROR = "NETWORK_ERROR",
-  TIMEOUT = "TIMEOUT",
+  SIMULATED_NETWORK_ERROR = "SIMULATED_NETWORK_ERROR",
 }
 
 export class ApiError extends Error {
@@ -50,7 +50,11 @@ class ApiClient {
     } catch (err: unknown) {
       const error = err as Error;
       if (error.name === "AbortError") {
-        throw new ApiError("Request timed out", 0, API_ERROR_CODES.TIMEOUT);
+        throw new ApiError(
+          "Network request failed",
+          0,
+          API_ERROR_CODES.NETWORK_ERROR
+        );
       }
       if (error instanceof TypeError) {
         throw new ApiError(
@@ -114,9 +118,9 @@ class ApiClient {
   ): Promise<T> {
     if (simulateNetworkFailure() && !isRetry) {
       throw new ApiError(
-        "Simulated network failure",
+        "Your request failed. Please try again. (Simulated Failure)",
         500,
-        API_ERROR_CODES.NETWORK_ERROR
+        API_ERROR_CODES.SIMULATED_NETWORK_ERROR
       );
     }
 
@@ -150,9 +154,9 @@ class ApiClient {
   ): Promise<T> {
     if (simulateNetworkFailure() && !isRetry) {
       throw new ApiError(
-        "Simulated network failure",
+        "Your request failed. Please try again. (Simulated Failure)",
         500,
-        API_ERROR_CODES.NETWORK_ERROR
+        API_ERROR_CODES.SIMULATED_NETWORK_ERROR
       );
     }
 
@@ -190,7 +194,7 @@ class ApiClient {
       );
       return this.handleResponse<T>(response);
     } catch (err: unknown) {
-      const error = err as Error
+      const error = err as Error;
       if (error instanceof TypeError) {
         throw new ApiError(
           "Network request failed",

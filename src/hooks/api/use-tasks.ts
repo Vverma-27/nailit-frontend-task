@@ -5,6 +5,7 @@ import { useOfflineStore } from "@/stores/offline-store";
 import { useOfflineQueue } from "@/hooks/use-offline-queue";
 import type { Task, CreateTaskInput, UpdateTaskInput } from "@/types";
 import { API_ERROR_CODES, ApiError } from "@/lib/api-client";
+import { toast } from "sonner";
 
 export function useTasks() {
   return useQuery({
@@ -59,11 +60,11 @@ export function useCreateTask() {
     retry: false,
     onError: (err, __, context) => {
       if (err instanceof ApiError) {
-        if ((err.code = API_ERROR_CODES.NETWORK_ERROR)) {
+        if (err.code === API_ERROR_CODES.NETWORK_ERROR) {
           setOnlineStatus(false);
           queueAction("CREATE", context?.optimisticTask.id, context?.newTask);
+          return;
         }
-        return;
       }
       if (isOnline && context?.previousTasks) {
         queryClient.setQueryData(QUERY_KEYS.TASKS, context.previousTasks);
@@ -120,7 +121,7 @@ export function useUpdateTask() {
     },
     onError: (err, _, context) => {
       if (err instanceof ApiError) {
-        if ((err.code = API_ERROR_CODES.NETWORK_ERROR)) {
+        if (err.code === API_ERROR_CODES.NETWORK_ERROR) {
           setOnlineStatus(false);
           queueAction("UPDATE", context?.taskId, context?.taskData);
         }
@@ -158,11 +159,14 @@ export function useDeleteTask() {
     },
     onError: (err, _, context) => {
       if (err instanceof ApiError) {
-        if ((err.code = API_ERROR_CODES.NETWORK_ERROR)) {
+        if (err.code === API_ERROR_CODES.NETWORK_ERROR) {
           setOnlineStatus(false);
           queueAction("DELETE", context?.deletedTaskId);
+          toast.error("Network request failed", {
+            description: "You are offline. We have queued your request.",
+          });
+          return;
         }
-        return;
       }
       // Revert the optimistic update on error
       if (context?.previousTasks) {

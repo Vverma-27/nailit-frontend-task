@@ -65,24 +65,36 @@ export function EditableTaskCard({ task }: EditableTaskCardProps) {
 
   const handleSave = () => {
     if (deletePending || updatePending) return;
-    if (!isOnline) {
-      queryClient.setQueryData<Task[]>(QUERY_KEYS.TASKS, (old) => {
-        if (!old) return [task];
-        return old.map((t) => (t.id === task.id ? { ...t, ...task } : t));
+    if (!title.trim()) {
+      toast.error("Title is required");
+      return;
+    }
+    let originalTask: Task | null = null;
+    queryClient.setQueryData<Task[]>(QUERY_KEYS.TASKS, (old) => {
+      if (!old) return [task];
+      return old.map((t) => {
+        if (t.id === task.id) {
+          originalTask = t;
+        }
+        return t.id === task.id
+          ? {
+              ...t,
+              title: title.trim(),
+              description: description.trim(),
+              priority,
+            }
+          : t;
       });
+    });
+    setIsEditing(false);
+    if (!isOnline) {
       queueAction("UPDATE", task.id, {
         title: title.trim(),
         description: description.trim(),
         priority,
       });
-      setIsEditing(false);
       return;
     }
-    if (!title.trim()) {
-      toast.error("Title is required");
-      return;
-    }
-
     updateTask(
       {
         id: task.id,
@@ -94,23 +106,29 @@ export function EditableTaskCard({ task }: EditableTaskCardProps) {
       },
       {
         onSuccess: () => {
-          setIsEditing(false);
           toast.success("Task updated successfully");
         },
         onError: (err) => {
           if (err instanceof ApiError) {
-            if ((err.code = API_ERROR_CODES.NETWORK_ERROR)) {
-              setIsEditing(false);
+            if (err.code === API_ERROR_CODES.NETWORK_ERROR) {
+              toast.error("Network request failed", {
+                description: "You are offline. We have queued your request.",
+              });
+              return;
             }
-            toast.error("Network request failed", {
-              description: "You are offline. We have queued your request.",
-            });
-            return;
           }
+          if (originalTask)
+            queryClient.setQueryData<Task[]>(QUERY_KEYS.TASKS, (old) => {
+              if (!old) return [];
+              return old.map((t) => (t.id === task.id ? originalTask! : t));
+            });
           toast.error("Failed to update task");
         },
       }
     );
+    setTitle(task.title);
+    setDescription(task.description);
+    setPriority(task.priority);
   };
 
   const handleCancel = () => {
@@ -135,15 +153,6 @@ export function EditableTaskCard({ task }: EditableTaskCardProps) {
         toast.success("Task deleted successfully");
       },
       onError: (err) => {
-        if (err instanceof ApiError) {
-          if ((err.code = API_ERROR_CODES.NETWORK_ERROR)) {
-            setIsEditing(false);
-          }
-          toast.error("Network request failed", {
-            description: "You are offline. We have queued your request.",
-          });
-          return;
-        }
         toast.error("Failed to delete task");
       },
     });
