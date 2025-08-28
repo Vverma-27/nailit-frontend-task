@@ -45,21 +45,6 @@ class OfflineQueueService {
             action.data as CreateTaskInput,
             true
           );
-
-          // If we have queryClient, replace the temp task with the server task
-          if (queryClient) {
-            queryClient.setQueryData<Task[]>(
-              QUERY_KEYS.TASKS,
-              (old: Task[] | undefined) => {
-                if (!old) return [serverTask];
-
-                // Replace temp task with server task
-                return old.map((task) =>
-                  task.id === action.taskId ? serverTask : task
-                );
-              }
-            );
-          }
         }
         break;
       case "UPDATE":
@@ -72,6 +57,9 @@ class OfflineQueueService {
           await deleteTask(action.taskId);
         }
         break;
+    }
+    if (queryClient) {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TASKS });
     }
   }
 
